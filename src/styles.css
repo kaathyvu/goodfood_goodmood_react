@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gelasio:wght@400;600&display=swap');
+
+*,
+*::before,
+*::after{
+    padding:0;
+    margin:0;
+    box-sizing:inherit;
+    font-family: 'Gelasio', serif;
+}
+/* html {
+    background-image: url(./assets/images/ramen2.jpg);
+    background-repeat: no-repeat;
+    background-position: center right;
+    background-attachment: fixed;
+    background-color: #f6eddb;
+} */
+
+#result-img {
+    max-width: 100%;
+    transition: 0.3s ease;
+}
+
+#result-img:hover {
+    opacity: 0.85;
+    transition: 0.5s ease;
+    cursor: pointer;
+}
