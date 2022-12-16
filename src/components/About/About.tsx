@@ -141,16 +141,18 @@ export const About = () => {
                 <NavA to='/signin'>SIGN IN</NavA>
                 <NavA to='/signup'>SIGN UP</NavA>
             </Box>
-            <Text>This full stack web application was created by Kathy Vu. It was built with React on the front-end and
-            Flask on the back-end with a PostgreSQL database. It was based on a first-world dilemma that I 
-            encounter frequently, which is "what the heck do I wanna eat for dinner?" I was sick and tired of eating the same things constantly, 
-            so I thought about how I could solve this issue. Therefore, Good Food Good Mood came to life. This application gives users the ability to
-            search through thousands of recipes. I incorporated a dashboard where users can save recipes they enjoyed, or add recipes of their own 
-            to create their own online digital cookbook. I was determined on building something that gave me the freedom to choose a recipe
-            based on my own search criteria, whether it be based on the ingredients leftover in my fridge, or random recipes to inspire me when I'm 
-            feeling ambitious to try something new.<br/>
+            <Container sx={myStyles.container}>
+                <h6 style={myStyles.headerH6}>This full stack web application was created by Kathy Vu. It was built with React on the front-end and
+                Flask on the back-end with a PostgreSQL database. It was based on a first-world dilemma that I 
+                encounter frequently, which is "what the heck do I wanna eat for dinner?" I was sick and tired of eating the same things constantly, 
+                so I thought about how I could solve this issue. Therefore, Good Food Good Mood came to life. This application gives users the ability to
+                search through thousands of recipes all in one place. I incorporated a dashboard where users can save recipes they enjoyed, or add recipes 
+                of their own to create their own online digital cookbook. I was determined on building something that gave me the freedom to choose a recipe
+                based on my own search criteria, whether it be based on the ingredients leftover in my fridge, or random recipes to inspire me when I'm 
+                feeling ambitious to try something new.<br/>
 
-            Source: <a href='https://spoonacular.com/food-api' style={myStyles.aLink}>Spoonacular API</a></Text>
+                Source: <Text><a href='https://spoonacular.com/food-api' style={myStyles.aLink}>Spoonacular API</a></Text></h6>
+            </Container>
         </Box>
         )
     }

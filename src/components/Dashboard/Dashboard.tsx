@@ -11,7 +11,6 @@ import { theme } from '../../Theme/themes';
 import ramen2 from '../../assets/images/ramen2.jpg'
 import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
-import RestaurantIcon from '@mui/icons-material/Restaurant';
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
 import { AddRecipeForm } from '../AddRecipeForm/AddRecipeForm';
 import { DataTable } from '../DataTable/DataTable'
