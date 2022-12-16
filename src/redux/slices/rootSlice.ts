@@ -10,7 +10,7 @@ const rootSlice = createSlice({
         ready_in_min: 30,
         source_url: '',
         num_likes: 1,
-        cuisine: '',
+        cuisines: '',
         summary: '',
         token: '',
     },
@@ -22,7 +22,7 @@ const rootSlice = createSlice({
         chooseReadyTime: (state,action) => { state.ready_in_min = action.payload },
         chooseSourceURL: (state,action) => { state.source_url = action.payload },
         chooseNumLikes: (state,action) => { state.num_likes = action.payload },
-        chooseCuisine: (state,action) => { state.cuisine = action.payload },
+        chooseCuisines: (state,action) => { state.cuisines = action.payload },
         chooseSummary: (state,action) => { state.summary = action.payload },
         chooseToken: (state,action) => { state.token = action.payload },
     }
@@ -30,4 +30,4 @@ const rootSlice = createSlice({
 
 export const reducer = rootSlice.reducer;
 export const {chooseRecipeId, chooseTitle, chooseImageURL, chooseServings, chooseReadyTime, chooseSourceURL, 
-    chooseNumLikes, chooseCuisine, chooseSummary, chooseToken} = rootSlice.actions
+    chooseNumLikes, chooseCuisines, chooseSummary, chooseToken} = rootSlice.actions

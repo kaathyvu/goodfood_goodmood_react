@@ -17,6 +17,7 @@ import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrow
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 
 
+
 const myStyles = {
     appBar: {
         paddingTop: '5vh',
@@ -228,6 +229,7 @@ export const Browse = () => {
     const [recipes, setRecipes] = useState([])
     const [dialogOpen, setDialogOpen] = useState(false);
     const [resultText, setResultText] = useState(true);
+    // const [offset, setOffset] = useState(6)
 
     const signUsOut = async () => {
         await signOut(auth)
@@ -285,17 +287,14 @@ export const Browse = () => {
             readyInMinutes = 1440
         }
 
-        // let url = `https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOON1}&includeIngredients=${ingred}&diet=${diet}&cuisine=${cuisine}&maxReadyTime=${readyInMinutes}&number=6&offset=`
         console.log(ingred, diet, cuisine, readyInMinutes)
         const response = await fetch(`
         https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOON1}&includeIngredients=${ingred}&diet=${diet}&cuisine=${cuisine}&maxReadyTime=${readyInMinutes}&number=6&offset=`)
-        const recipeData = await response.json()
+        let recipeData = await response.json()
         setRecipes(await recipeData.results)
         console.log(recipeData.results)
-
+        
         setResultText(false)
-
-        localStorage.setItem('offset', '0')
         event.target.reset()
     }
 
@@ -303,10 +302,12 @@ export const Browse = () => {
         const response = await fetch(`https://api.spoonacular.com/recipes/random?apiKey=${SPOON1}&number=6`)
         const recipeData = await response.json()
         setRecipes(await recipeData.recipes)
+        setResultText(false)
+        handleDialogClose()
     }
 
-    const recipeId = (id:any) => {
-        localStorage.setItem('recipeid', id)
+    const recipeId = (recipeid:any) => {
+        localStorage.setItem('recipeid', recipeid)
         navigate('/recipe')
     };
 
@@ -321,8 +322,16 @@ export const Browse = () => {
         // let current
         // let url =
     };
-    const nextPage = () => {
 
+    const nextPage = async () => {
+        // const totalResults = parseInt(localStorage.getItem('totalResults'))
+        // setOffset(offset + 6)
+        // if (offset <= totalResults) {
+        //     const response = await fetch(`
+        //     https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOON1}&includeIngredients=${ingred}&diet=${diet}&cuisine=${cuisine}&maxReadyTime=${readyInMinutes}&number=6&offset=${offset}`)
+        //     let recipeData = await response.json()
+        //     setRecipes(await recipeData.results)
+        // }
     };
 
     let isAuthenticated = localStorage.getItem('myAuth')
@@ -469,7 +478,7 @@ export const Browse = () => {
 
             </MUIDrawer>
 
-            <Box sx={myStyles.pages}>
+            <Box sx={resultText ? myStyles.hide : myStyles.pages}>
                 <IconButton aria-label='prev-page' sx={myStyles.pageButton} onClick={prevPage}>
                     <KeyboardDoubleArrowLeftIcon sx={{fontSize:'2em'}}/>
                 </IconButton>
@@ -637,7 +646,7 @@ export const Browse = () => {
 
             </MUIDrawer>
 
-            <Box sx={myStyles.pages}>
+            <Box sx={resultText ? myStyles.hide : myStyles.pages}>
                 <IconButton aria-label='prev-page' sx={myStyles.pageButton} onClick={prevPage}>
                     <KeyboardDoubleArrowLeftIcon sx={{fontSize:'2em'}}/>
                 </IconButton>

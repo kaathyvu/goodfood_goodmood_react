@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
-import { Home, About, Browse, SignIn, SignUp, Dashboard, Recipe } from './components';
+import { Home, About, Browse, SignIn, SignUp, Dashboard, Recipe, SavedRecipe } from './components';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './styles.css'
 import { theme } from './Theme/themes';
@@ -29,6 +29,7 @@ root.render(
               <Route path='/signup' element={<SignUp/>}/>
               <Route path='/dashboard' element={<Dashboard/>}/>
               <Route path='/recipe' element={<Recipe/>}/>
+              <Route path='/savedrecipe' element={<SavedRecipe/>}/>
             </Routes>
           </Router>
         </ThemeProvider>

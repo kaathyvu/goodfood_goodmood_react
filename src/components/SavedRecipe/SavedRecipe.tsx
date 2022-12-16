@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Drawer as MUIDrawer, AppBar, Box, Button, CssBaseline, Divider, Grid, IconButton, Toolbar, Typography, } from '@mui/material';
+import { Drawer as MUIDrawer, AppBar, Box, Button, CssBaseline, Checkbox, Dialog, DialogTitle, 
+    DialogContent, DialogActions, Divider, Grid, IconButton, Toolbar, Typography, TextField
+} from '@mui/material';
 import { getAuth, signOut, } from 'firebase/auth';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
@@ -8,11 +10,10 @@ import { styled } from '@mui/system'
 import { theme } from '../../Theme/themes';
 import ramen2 from '../../assets/images/ramen2.jpg'
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import { chooseRecipeId, chooseTitle, chooseImageURL, chooseServings, chooseReadyTime, chooseSourceURL, 
-    chooseNumLikes, chooseCuisines, chooseSummary, chooseToken } from '../../redux/slices/rootSlice'
-import { useDispatch, useSelector, useStore } from 'react-redux';
 import { serverCalls } from '../../api';
-
+import { UpdateRecipeForm } from '../AddRecipeForm';
+import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
+import Favorite from '@mui/icons-material/Favorite';
 
 
 const myStyles = {
@@ -117,7 +118,7 @@ const myStyles = {
         fontFamily: 'gelasio',
         border: '1px solid #ede1ca',
         padding: '0.75vh 1.2vw',
-        margin: '3vh 0 2vh 0',
+        margin: '0 0 2vh 0',
         transition: '0.25s ease',
         "&:hover": {
             backgroundColor: '#ede1ca',
@@ -125,13 +126,13 @@ const myStyles = {
             transition: '0.3s ease'
         }
     },
-    backButton: {
+    deleteButton: {
         backgroundColor: '#e7dbc6',
         color: '#66513e',
         fontFamily: 'gelasio',
         border: '1px solid #ede1ca',
         padding: '0.75vh 1.2vw',
-        margin: '3vh 0 2vh 1vw',
+        margin: '0 0 2vh 1vw',
         transition: '0.25s ease',
         "&:hover": {
             backgroundColor: '#ede1ca',
@@ -186,6 +187,15 @@ const myStyles = {
         letterSpacing: '1px',
         paddingTop: '3vh',
     },
+    heart: {
+        color: "#d32f2f"
+    },
+    textH6: {
+        fontSize: '1em',
+        color: '#422913',
+        display: 'flex',
+        padding: '1vh 0 0 0.25vh',
+    }, 
 }
 
 const NavA = styled(Link) ({
@@ -223,15 +233,30 @@ const Text = styled('h1') ({
     }
 })
 
-export const Recipe = () => {
+const RandomA = styled(Link) ({
+    textDecoration: 'none',
+    fontFamily: 'gelasio',
+    fontSize: '1em',
+    lineHeight: '1em',
+    color: '#422913',
+    display: 'inline-flex',
+    transition: '0.25s ease',
+    letterSpacing: '1px',
+    margin: '0 0 4vh 0.25vw',
+    "&:hover": {
+        color: '#66513e',
+        paddingLeft: '0.5vh',
+        transition: '0.3s ease',
+    }
+})
+
+export const SavedRecipe = () => {
     const navigate = useNavigate();
-    const store = useStore();
     const auth = getAuth();
-    const dispatch = useDispatch();
     const [open, setOpen] = useState(false);
     const [recipe, setRecipe] = useState<any>({});
-    const [ingredients, setIngredients] = useState<any>([]);
-    const [instructions, setInstructions] = useState<any>([]);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [checked, setChecked] = useState(false);
 
     const signUsOut = async () => {
         await signOut(auth)
@@ -252,45 +277,56 @@ export const Recipe = () => {
         document.body.style.overflow = 'unset';
     };
 
-    const saveRecipe = async() => {
-        let token = localStorage.getItem('token')
-
-        if (token === null || token === 'none') {
-            navigate('/signin')
-        } else if (recipe.cuisines[0] === undefined) {
-            dispatch(chooseRecipeId(localStorage.getItem('recipeid')))
-            dispatch(chooseTitle(recipe.title))
-            dispatch(chooseImageURL(`https://spoonacular.com/recipeImages/${recipe.id}-636x393.${recipe.imageType}`))
-            dispatch(chooseServings(recipe.servings))
-            dispatch(chooseReadyTime(recipe.readyInMinutes))
-            dispatch(chooseSourceURL(recipe.sourceUrl))
-            dispatch(chooseNumLikes(recipe.aggregateLikes))
-            dispatch(chooseSummary(recipe.summary))
-            dispatch(chooseToken(localStorage.getItem('token')))
-            await serverCalls.create(store.getState())
-        } else {
-            dispatch(chooseRecipeId(localStorage.getItem('recipeid')))
-            dispatch(chooseTitle(recipe.title))
-            dispatch(chooseImageURL(`https://spoonacular.com/recipeImages/${recipe.id}-636x393.${recipe.imageType}`))
-            dispatch(chooseServings(recipe.servings))
-            dispatch(chooseReadyTime(recipe.readyInMinutes))
-            dispatch(chooseSourceURL(recipe.sourceUrl))
-            dispatch(chooseNumLikes(recipe.aggregateLikes))
-            dispatch(chooseCuisines(recipe.cuisines[0]))
-            dispatch(chooseSummary(recipe.summary))
-            dispatch(chooseToken(localStorage.getItem('token')))
-            await serverCalls.create(store.getState())
-        }
+    const handleDialogOpen = () => {
+        setDialogOpen(true);
+    };
+    const handleDialogClose = () => {
+        setDialogOpen(false);
     };
 
+    const deleteRecipe = async (id:string) => {
+        const response = await serverCalls.delete(id)
+        navigate('/dashboard')
+    };
+
+    const saveOrDelete = async (id:string) => {
+        setChecked(!checked)
+        if (checked === false) {
+            const response = await serverCalls.delete(id)
+            console.log(id, "deleted recipe")
+        } else {
+            let data = {
+                "recipeid": `${localStorage.getItem('recipeid')}`,
+                "title": `${localStorage.getItem('title')}`,
+                "image_url": `${localStorage.getItem('image_url')}`,
+                "servings": `${localStorage.getItem('servings')}`,
+                "ready_in_min": `${localStorage.getItem('ready_in_min')}`,
+                "source_url": `${localStorage.getItem('source_url')}`,
+                "num_likes": `${localStorage.getItem('num_likes')}`,
+                "cuisines": `${localStorage.getItem('cuisines')}`,
+                "summary": `${localStorage.getItem('summary')}`,
+                "token": `${localStorage.getItem('token')}`,
+            }
+            const response = await serverCalls.create(data)
+            localStorage.setItem('id', response.id)
+            console.log("resaved recipe", response.id)
+        }
+    }
+
     const recipeInfo = async () => {
-        let recipeId = localStorage.getItem('recipeid')
-        const response = await fetch(`https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${SPOON1}`)
-        const data = await response.json()
-        setRecipe(await data)
-        console.log(data)
-        setIngredients(data.extendedIngredients)
-        setInstructions(data.analyzedInstructions[0].steps)
+        let id = localStorage.getItem('id')
+        const response = await serverCalls.getOne(id)
+        setRecipe(await response)
+        console.log(response)
+        localStorage.setItem('recipeid', response.recipeid)
+        localStorage.setItem('title', response.title)
+        localStorage.setItem('image_url', response.image_url)
+        localStorage.setItem('servings', response.servings)
+        localStorage.setItem('ready_in_min', response.ready_in_min)
+        localStorage.setItem('source_url', response.source_url)
+        localStorage.setItem('num_likes', response.num_likes)
+        localStorage.setItem('cuisines', response.cuisines)
+        localStorage.setItem('summary', response.summary)
     };
 
     useEffect(() => {
@@ -338,7 +374,7 @@ export const Recipe = () => {
             <Box sx={myStyles.content}>
             <br/><br/>
                 <Grid container sx={myStyles.resultBox}>
-                    <img src={`https://spoonacular.com/recipeImages/${recipe.id}-636x393.${recipe.imageType}`} alt="Recipe" style={{width:'100%',}}/>
+                    <img src={recipe.image_url} alt="Recipe" style={{width:'100%',}}/>
                     <Grid item xs={12}><h1 style={myStyles.titleText}>{recipe.title}</h1></Grid>
                     <Grid item xs={4}>
                         <div style={{ display: "flex", alignItems: "center", marginTop: "1vh" }}>
@@ -361,121 +397,41 @@ export const Recipe = () => {
                             <div style={{ flex: 1, backgroundColor: "#422913", height: "1px"}} />
                         </div>
                     </Grid>
-                    <Grid item xs={4} sx={myStyles.headerText}><p>{recipe.aggregateLikes} <FavoriteIcon sx={{fontSize:'1em'}}/></p></Grid>
+                    <Grid item xs={4} sx={myStyles.headerText}><p>{recipe.num_likes} <FavoriteIcon sx={{fontSize:'1em', color: '#d32f2f'}}/></p></Grid>
                     <Grid item xs={4} sx={myStyles.headerText}><p>{recipe.servings}</p></Grid>
-                    <Grid item xs={4} sx={myStyles.headerText}><p>{recipe.readyInMinutes} MIN</p></Grid>
+                    <Grid item xs={4} sx={myStyles.headerText}><p>{recipe.ready_in_min} MIN</p></Grid>
 
                     <Grid item xs={12} sx={myStyles.descriptText}><p>{recipe.summary}</p></Grid>
 
-                    <Grid item xs={12} sx={myStyles.descriptText}><p><b>INGREDIENTS:</b></p></Grid>
-                    <Grid item xs={12} sx={myStyles.otherText}><ul>
-                    {ingredients.map((item:any) => (
-                        <li style={{margin: '0 3vw'}}>{item.amount} {item.unit} {item.name}</li>
-                    ))}</ul></Grid>
-
-                    <Grid item xs={12} sx={myStyles.descriptText}><p><b>INSTRUCTIONS:</b></p></Grid>
-                    <Grid item xs={12} sx={myStyles.otherText}><ol>
-                    {instructions.map((item:any) => (
-                        <li style={{margin: '0 3vw'}}>{item.step}</li>
-                    ))}</ol></Grid>
                     <Grid item xs={12}>
-                        <Text><a href={recipe.source_url} style={myStyles.aLink}>Check out the original source here.</a></Text>
+                        <Text><a href={recipe.source_url} style={myStyles.aLink}>Check out the original source here for full ingredient list and instructions.</a></Text>
                     </Grid>
 
-                    <Button sx={myStyles.saveButton} onClick={saveRecipe}>SAVE THIS RECIPE</Button>
-                    <Button sx={myStyles.backButton} onClick={() => navigate(-1)}>BACK TO RESULTS</Button>
+                    <Dialog open={dialogOpen} onSubmit={handleDialogClose} aria-labelledby='form-dialog-title' fullWidth maxWidth='sm'>
+                        <DialogTitle id='form-dialog-title'>Update Recipe</DialogTitle>
+                        <DialogContent>
+                            <UpdateRecipeForm/>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleDialogClose} color="error">Cancel</Button>
+                        </DialogActions>
+                    </Dialog>
+
+                    <Grid item xs={12} sx={{display: 'flex', justifyContent: 'space-between' }}>
+                        <Button sx={myStyles.saveButton} onClick={handleDialogOpen}>UPDATE RECIPE</Button>
+                        <Checkbox 
+                            icon={<Favorite/>} 
+                            checkedIcon={<FavoriteBorder/>}
+                            checked={checked}
+                            onChange={() => saveOrDelete(recipe.id)}
+                            sx={myStyles.heart}/>
+                    </Grid>
                 </Grid>
             </Box>
             </Box>
         )
     } else {
-        return (
-        <Box sx={{overflowY: 'auto', backgroundColor:'#f6eddb', backgroundImage: `url(${ramen2})`, backgroundPosition:'center right', backgroundRepeat:'no-repeat', height:'100vh', backgroundAttachment:'fixed'}}>
-            <CssBaseline/>
-            <AppBar sx={open ? myStyles.appBarShift : myStyles.appBar} position="fixed" elevation={0}>
-                <Toolbar sx = {myStyles.toolbar}>
-                    <Typography variant="h6" noWrap sx={myStyles.toolbarText} component="div">
-                        GOOD FOOD GOOD MOOD
-                    </Typography>
-                    <IconButton aria-label='open-drawer' onClick={handleDrawerOpen} edge='end' sx={open ? myStyles.hide : myStyles.menuButton}>
-                        <MenuIcon/>
-                    </IconButton>
-                </Toolbar>
-            </AppBar>
-
-            <MUIDrawer
-                sx={open ? myStyles.drawer : myStyles.hide}
-                variant='persistent'
-                anchor='top'
-                open={open}
-            >
-                <Box sx={myStyles.drawerHeader}>
-                    <IconButton onClick={handleDrawerClose} style={myStyles.closeButton}>
-                        <CloseIcon/>
-                    </IconButton>
-                </Box>
-
-                <Divider/>
-
-                <NavA to='/'>HOME</NavA>
-                <NavA to='/about'>ABOUT</NavA>
-                <NavA to='/browse'>BROWSE</NavA>
-                <NavA to='/signin'>SIGN IN</NavA>
-                <NavA to='/signup'>SIGN UP</NavA>
-
-            </MUIDrawer>
-
-            <Box sx={myStyles.content}>
-            <br/><br/>
-                <Grid container sx={myStyles.resultBox}>
-                    <img src={`https://spoonacular.com/recipeImages/${recipe.id}-636x393.${recipe.imageType}`} alt="Recipe" style={{width:'100%',}}/>
-                    <Grid item xs={12}><h1 style={myStyles.titleText}>{recipe.title}</h1></Grid>
-                    <Grid item xs={4}>
-                        <div style={{ display: "flex", alignItems: "center", marginTop: "1vh" }}>
-                            <div style={{ flex: 1, backgroundColor: "#422913", height: "1px",}} />
-                            <p style={{ margin: "0 1vw" }}>LIKES</p>
-                            <div style={{ flex: 1, backgroundColor: "#422913", height: "1px" }} />
-                        </div>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <div style={{ display: "flex", alignItems: "center", marginTop: "1vh" }}>
-                            <div style={{ flex: 1, backgroundColor: "#422913", height: "1px"}} />
-                            <p style={{ margin: "0 1vw" }}>SERVINGS</p>
-                            <div style={{ flex: 1, backgroundColor: "#422913", height: "1px"}} />
-                        </div>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <div style={{ display: "flex", alignItems: "center", marginTop: "1vh" }}>
-                            <div style={{ flex: 1, backgroundColor: "#422913", height: "1px"}} />
-                            <p style={{ margin: "0 1vw" }}>READY IN</p>
-                            <div style={{ flex: 1, backgroundColor: "#422913", height: "1px"}} />
-                        </div>
-                    </Grid>
-                    <Grid item xs={4} sx={myStyles.headerText}><p>{recipe.aggregateLikes} <FavoriteIcon sx={{fontSize:'1em'}}/></p></Grid>
-                    <Grid item xs={4} sx={myStyles.headerText}><p>{recipe.servings}</p></Grid>
-                    <Grid item xs={4} sx={myStyles.headerText}><p>{recipe.readyInMinutes} MIN</p></Grid>
-
-                    <Grid item xs={12} sx={myStyles.descriptText}><p>{recipe.summary}</p></Grid>
-
-                    <Grid item xs={12} sx={myStyles.descriptText}><p><b>INGREDIENTS:</b></p></Grid>
-                    <Grid item xs={12} sx={myStyles.otherText}><ul>
-                    {ingredients.map((item:any) => (
-                        <li style={{margin: '0 3vw'}}>{item.amount} {item.unit} {item.name}</li>
-                    ))}</ul></Grid>
-
-                    <Grid item xs={12} sx={myStyles.descriptText}><p><b>INSTRUCTIONS:</b></p></Grid>
-                    <Grid item xs={12} sx={myStyles.otherText}><ol>
-                    {instructions.map((item:any) => (
-                        <li style={{margin: '0 3vw'}}>{item.step}</li>
-                    ))}</ol></Grid>
-                    <Grid item xs={12}><a href={recipe.sourceUrl} style={myStyles.aLink}>Check out the original source here.</a></Grid>
-
-                    <Button sx={myStyles.saveButton} onClick={saveRecipe}>SAVE THIS RECIPE</Button>
-                    <Button sx={myStyles.backButton} onClick={() => navigate(-1)}>BACK TO RESULTS</Button>
-                    
-                </Grid>
-            </Box>
-            </Box>
-        )
+        window.location.replace('/signin')
+        return null
     }
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Drawer as MUIDrawer, AppBar, Box, Button, CssBaseline, Dialog, DialogTitle, 
-    DialogContent, DialogActions, Divider, Grid, IconButton, Toolbar, Typography, useTheme,
+    DialogContent, DialogActions, Divider, Grid, IconButton, Toolbar, Typography,
 } from '@mui/material';
 import { getAuth, signOut, } from 'firebase/auth';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -9,13 +9,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { styled } from '@mui/system'
 import { theme } from '../../Theme/themes';
 import ramen2 from '../../assets/images/ramen2.jpg'
-import { useForm } from 'react-hook-form';
-import { Input } from '../sharedComponents/Input';
 import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
-import { RecipeForm } from '../AddRecipeForm/AddRecipeForm';
+import { AddRecipeForm } from '../AddRecipeForm/AddRecipeForm';
 import { DataTable } from '../DataTable/DataTable'
 
 const myStyles = {
@@ -151,18 +149,10 @@ const myStyles = {
         paddingTop: '2vh'
     },
     textH6: {
-        fontSize: '0.9em',
+        fontSize: '1em',
         color: '#422913',
-        textAlign: 'center' as 'center',
         display: 'flex',
-        justifyContent: 'center',
-        padding: '0.5vh 0.25vh',
-        transition: '0.25s ease',
-        "&:hover": {
-            transition: '0.3s ease',
-            color: '#422913',
-            backgroundColor: '#e7dbc6'
-        },
+        padding: '1vh 0 0 0.25vh',
     }, 
     resultRow1: {
         width: '100%',
@@ -209,13 +199,29 @@ const NavA = styled(Link) ({
     },
 })
 
+const RandomA = styled(Link) ({
+    textDecoration: 'none',
+    fontFamily: 'gelasio',
+    fontSize: '1em',
+    lineHeight: '1em',
+    color: '#422913',
+    display: 'flex',
+    transition: '0.25s ease',
+    letterSpacing: '1px',
+    marginLeft: '0.2vw',
+    padding: '0.44vh',
+    "&:hover": {
+        color: '#66513e',
+        paddingTop: '0vh',
+        transition: '0.3s ease',
+    }
+})
+
 export const Dashboard = () => {
     const navigate = useNavigate();
     const[open, setOpen] = useState(false);
     const auth = getAuth();
-    const { register, handleSubmit } = useForm({});
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [resultText, setResultText] = useState(true);
 
     const signUsOut = async () => {
         await signOut(auth)
@@ -247,7 +253,7 @@ export const Dashboard = () => {
     let isAuthenticated = localStorage.getItem('myAuth')
     if (isAuthenticated === 'true') {
         return (
-        <Box sx={{backgroundColor:'#f6eddb', backgroundImage: `url(${ramen2})`, backgroundPosition:'center right', backgroundRepeat:'no-repeat', height:'100vh', backgroundAttachment:'fixed'}}>
+        <Box sx={{overflowY: 'auto', backgroundColor:'#f6eddb', backgroundImage: `url(${ramen2})`, backgroundPosition:'center right', backgroundRepeat:'no-repeat', height:'100vh', backgroundAttachment:'fixed'}}>
             <CssBaseline/>
             <AppBar sx={open ? myStyles.appBarShift : myStyles.appBar} position="fixed" elevation={0}>
                 <Toolbar sx = {myStyles.toolbar}>
@@ -265,8 +271,7 @@ export const Dashboard = () => {
                     <Dialog open={dialogOpen} onSubmit={handleDialogClose} aria-labelledby='form-dialog-title' fullWidth maxWidth='sm'>
                         <DialogTitle id='form-dialog-title'>Create Your Own Recipe!</DialogTitle>
                         <DialogContent>
-                            Fields marked with * are required
-                            <RecipeForm/>
+                            <AddRecipeForm/>
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={handleDialogClose} color="error">Cancel</Button>
@@ -298,14 +303,14 @@ export const Dashboard = () => {
 
             </MUIDrawer>
 
-            <Box sx={myStyles.pages}>
+            {/* <Box sx={myStyles.pages}>
                 <IconButton aria-label='prev-page' sx={myStyles.pageButton}>
                     <KeyboardDoubleArrowLeftIcon sx={{fontSize:'2em'}}/>
                 </IconButton>
                 <IconButton aria-label='next-page' sx={myStyles.pageButton}>
                     <KeyboardDoubleArrowRightIcon sx={{fontSize:'2em'}}/>
                 </IconButton>
-            </Box>
+            </Box> */}
             
 
             <Box sx={myStyles.content}>
@@ -315,8 +320,7 @@ export const Dashboard = () => {
             </Box>
         )
     } else {
-        return (
-            <div>Sign In to view your data</div>
-        )
+        window.location.replace('/signin')
+        return null
     }
 }
