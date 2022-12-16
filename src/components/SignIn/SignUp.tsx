@@ -119,9 +119,7 @@ export const SignUp = () => {
 
         createUserWithEmailAndPassword(auth, data.email, data.password)
             .then((userCredential) => {
-                console.log(userCredential)
                 const user = userCredential.user
-                console.log(user)
                 navigate('/signin')
             })
             .catch((err) => {

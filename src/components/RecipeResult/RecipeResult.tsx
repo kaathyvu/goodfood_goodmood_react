@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Drawer as MUIDrawer, AppBar, Box, Button, CssBaseline, Divider, Grid, IconButton, Toolbar, Typography, } from '@mui/material';
+import { Drawer as MUIDrawer, AppBar, Box, Button, CssBaseline, Checkbox, Divider, Grid, IconButton, Toolbar, Typography, } from '@mui/material';
 import { getAuth, signOut, } from 'firebase/auth';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
@@ -12,8 +12,11 @@ import { chooseRecipeId, chooseTitle, chooseImageURL, chooseServings, chooseRead
     chooseNumLikes, chooseCuisines, chooseSummary, chooseToken } from '../../redux/slices/rootSlice'
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { serverCalls } from '../../api';
+import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
+import Favorite from '@mui/icons-material/Favorite';
 
-
+const SPOON1 = '77f97ae6911848258d076ef999d0b3e0'
+const SPOON2 = 'ca5482a9ab914ecd826cee569a79155c'
 
 const myStyles = {
     appBar: {
@@ -111,27 +114,13 @@ const myStyles = {
         flexGrow: 1,
         fontWeight: 600,
     },
-    saveButton: {
-        backgroundColor: '#e7dbc6',
-        color: '#66513e',
-        fontFamily: 'gelasio',
-        border: '1px solid #ede1ca',
-        padding: '0.75vh 1.2vw',
-        margin: '3vh 0 2vh 0',
-        transition: '0.25s ease',
-        "&:hover": {
-            backgroundColor: '#ede1ca',
-            border: '1px solid #b9a99c',
-            transition: '0.3s ease'
-        }
-    },
     backButton: {
         backgroundColor: '#e7dbc6',
         color: '#66513e',
         fontFamily: 'gelasio',
         border: '1px solid #ede1ca',
         padding: '0.75vh 1.2vw',
-        margin: '3vh 0 2vh 1vw',
+        margin: '0vh 0 2vh 1vw',
         transition: '0.25s ease',
         "&:hover": {
             backgroundColor: '#ede1ca',
@@ -186,6 +175,9 @@ const myStyles = {
         letterSpacing: '1px',
         paddingTop: '3vh',
     },
+    heart: {
+        color: "#d32f2f"
+    },
 }
 
 const NavA = styled(Link) ({
@@ -215,7 +207,7 @@ const Text = styled('h1') ({
     display: 'inline-flex',
     transition: '0.25s ease',
     letterSpacing: '1px',
-    margin: '0 0 4vh 0.25vw',
+    margin: '3vh 0 4vh 0.25vw',
     "&:hover": {
         color: '#66513e',
         paddingLeft: '0.5vh',
@@ -232,6 +224,7 @@ export const Recipe = () => {
     const [recipe, setRecipe] = useState<any>({});
     const [ingredients, setIngredients] = useState<any>([]);
     const [instructions, setInstructions] = useState<any>([]);
+    const [checked, setChecked] = useState(true);
 
     const signUsOut = async () => {
         await signOut(auth)
@@ -252,11 +245,22 @@ export const Recipe = () => {
         document.body.style.overflow = 'unset';
     };
 
-    const saveRecipe = async() => {
+
+
+    const saveOrDelete = async() => {
         let token = localStorage.getItem('token')
 
         if (token === null || token === 'none') {
             navigate('/signin')
+        }
+        console.log(checked)
+        setChecked(!checked)
+        console.log(checked)
+
+        if (checked === false) {
+            let id:any = localStorage.getItem('id')
+            const response = await serverCalls.delete(id)
+            console.log(id, "deleted recipe")
         } else if (recipe.cuisines[0] === undefined) {
             dispatch(chooseRecipeId(localStorage.getItem('recipeid')))
             dispatch(chooseTitle(recipe.title))
@@ -267,7 +271,9 @@ export const Recipe = () => {
             dispatch(chooseNumLikes(recipe.aggregateLikes))
             dispatch(chooseSummary(recipe.summary))
             dispatch(chooseToken(localStorage.getItem('token')))
-            await serverCalls.create(store.getState())
+            const response = await serverCalls.create(store.getState())
+            localStorage.setItem('id', response.id)
+            console.log("saved recipe", response.id)
         } else {
             dispatch(chooseRecipeId(localStorage.getItem('recipeid')))
             dispatch(chooseTitle(recipe.title))
@@ -279,7 +285,9 @@ export const Recipe = () => {
             dispatch(chooseCuisines(recipe.cuisines[0]))
             dispatch(chooseSummary(recipe.summary))
             dispatch(chooseToken(localStorage.getItem('token')))
-            await serverCalls.create(store.getState())
+            const response = await serverCalls.create(store.getState())
+            localStorage.setItem('id', response.id)
+            console.log("saved recipe", response.id)
         }
     };
 
@@ -361,7 +369,7 @@ export const Recipe = () => {
                             <div style={{ flex: 1, backgroundColor: "#422913", height: "1px"}} />
                         </div>
                     </Grid>
-                    <Grid item xs={4} sx={myStyles.headerText}><p>{recipe.aggregateLikes} <FavoriteIcon sx={{fontSize:'1em'}}/></p></Grid>
+                    <Grid item xs={4} sx={myStyles.headerText}><p>{recipe.aggregateLikes} <FavoriteIcon sx={{fontSize:'1em', color: '#d32f2f'}}/></p></Grid>
                     <Grid item xs={4} sx={myStyles.headerText}><p>{recipe.servings}</p></Grid>
                     <Grid item xs={4} sx={myStyles.headerText}><p>{recipe.readyInMinutes} MIN</p></Grid>
 
@@ -382,15 +390,22 @@ export const Recipe = () => {
                         <Text><a href={recipe.source_url} style={myStyles.aLink}>Check out the original source here.</a></Text>
                     </Grid>
 
-                    <Button sx={myStyles.saveButton} onClick={saveRecipe}>SAVE THIS RECIPE</Button>
-                    <Button sx={myStyles.backButton} onClick={() => navigate(-1)}>BACK TO RESULTS</Button>
+                    <Grid item xs={12} sx={{display: 'flex', justifyContent: 'space-between' }}>
+                        <Button sx={myStyles.backButton} onClick={() => navigate(-1)}>BACK TO RESULTS</Button>
+                        <Checkbox 
+                            icon={<Favorite/>} 
+                            checkedIcon={<FavoriteBorder/>}
+                            checked={checked}
+                            onChange={saveOrDelete}
+                            sx={myStyles.heart}/>
+                    </Grid>
                 </Grid>
             </Box>
             </Box>
         )
     } else {
         return (
-        <Box sx={{overflowY: 'auto', backgroundColor:'#f6eddb', backgroundImage: `url(${ramen2})`, backgroundPosition:'center right', backgroundRepeat:'no-repeat', height:'100vh', backgroundAttachment:'fixed'}}>
+            <Box sx={{overflowY:'auto', backgroundColor:'#f6eddb', backgroundImage: `url(${ramen2})`, backgroundPosition:'center right', backgroundRepeat:'no-repeat', height:'100vh', backgroundAttachment:'fixed'}}>
             <CssBaseline/>
             <AppBar sx={open ? myStyles.appBarShift : myStyles.appBar} position="fixed" elevation={0}>
                 <Toolbar sx = {myStyles.toolbar}>
@@ -421,7 +436,7 @@ export const Recipe = () => {
                 <NavA to='/about'>ABOUT</NavA>
                 <NavA to='/browse'>BROWSE</NavA>
                 <NavA to='/signin'>SIGN IN</NavA>
-                <NavA to='/signup'>SIGN UP</NavA>
+                <NavA to='/sign up'>SIGN UP</NavA>
 
             </MUIDrawer>
 
@@ -451,7 +466,7 @@ export const Recipe = () => {
                             <div style={{ flex: 1, backgroundColor: "#422913", height: "1px"}} />
                         </div>
                     </Grid>
-                    <Grid item xs={4} sx={myStyles.headerText}><p>{recipe.aggregateLikes} <FavoriteIcon sx={{fontSize:'1em'}}/></p></Grid>
+                    <Grid item xs={4} sx={myStyles.headerText}><p>{recipe.aggregateLikes} <FavoriteIcon sx={{fontSize:'1em', color: '#d32f2f'}}/></p></Grid>
                     <Grid item xs={4} sx={myStyles.headerText}><p>{recipe.servings}</p></Grid>
                     <Grid item xs={4} sx={myStyles.headerText}><p>{recipe.readyInMinutes} MIN</p></Grid>
 
@@ -468,11 +483,19 @@ export const Recipe = () => {
                     {instructions.map((item:any) => (
                         <li style={{margin: '0 3vw'}}>{item.step}</li>
                     ))}</ol></Grid>
-                    <Grid item xs={12}><a href={recipe.sourceUrl} style={myStyles.aLink}>Check out the original source here.</a></Grid>
+                    <Grid item xs={12}>
+                        <Text><a href={recipe.source_url} style={myStyles.aLink}>Check out the original source here.</a></Text>
+                    </Grid>
 
-                    <Button sx={myStyles.saveButton} onClick={saveRecipe}>SAVE THIS RECIPE</Button>
-                    <Button sx={myStyles.backButton} onClick={() => navigate(-1)}>BACK TO RESULTS</Button>
-                    
+                    <Grid item xs={12} sx={{display: 'flex', justifyContent: 'space-between' }}>
+                        <Button sx={myStyles.backButton} onClick={() => navigate(-1)}>BACK TO RESULTS</Button>
+                        <Checkbox 
+                            icon={<Favorite/>} 
+                            checkedIcon={<FavoriteBorder/>}
+                            checked={checked}
+                            onChange={saveOrDelete}
+                            sx={myStyles.heart}/>
+                    </Grid>
                 </Grid>
             </Box>
             </Box>

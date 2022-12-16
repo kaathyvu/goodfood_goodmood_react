@@ -3,7 +3,7 @@ import { useDispatch, useSelector, useStore } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { chooseRecipeId, chooseTitle, chooseImageURL, chooseServings, chooseReadyTime, chooseSourceURL, 
     chooseNumLikes, chooseCuisines, chooseSummary, chooseToken } from '../../redux/slices/rootSlice'
-import { Input } from '../sharedComponents/Input'; 
+import { Input, InputSummary } from '../sharedComponents/Input'; 
 import { serverCalls } from '../../api';
 import { Drawer as MUIDrawer, Button, Grid, TextField } from '@mui/material';
 
@@ -48,8 +48,6 @@ export const AddRecipeForm = (props: RecipeFormProps) => {
     const { register, handleSubmit } = useForm({});
 
     const onSubmit = async (data: any, event:any) => {
-        console.log(props.id)
-
         dispatch(chooseTitle(data.title))
         dispatch(chooseImageURL(data.image_url))
         dispatch(chooseServings(data.servings))
@@ -58,7 +56,6 @@ export const AddRecipeForm = (props: RecipeFormProps) => {
         dispatch(chooseSummary(data.summary))
         dispatch(chooseToken(localStorage.getItem('token')))
         await serverCalls.create(store.getState())
-        console.log(store)
         window.location.reload()
     }
     return (
@@ -80,7 +77,7 @@ export const AddRecipeForm = (props: RecipeFormProps) => {
                 <Input required {...register('cuisines')} name='cuisines' label='Enter Cuisine Type'/>
             </Grid>
             <Grid item>
-                <Input required {...register('summary')} name='summary' label='Enter Brief Summary About Recipe'/>
+                <InputSummary required {...register('summary')} name='summary' label='Enter Brief Summary About Recipe'/>
             </Grid>
             <Button type='submit' sx={myStyles.submitButton}>Submit</Button>
         </form>
@@ -117,9 +114,8 @@ export const UpdateRecipeForm = (props: RecipeFormProps) => {
         data.recipeid = localStorage.getItem('recipeid')
         data.num_likes = localStorage.getItem('num_likes')
         data.token = localStorage.getItem('token')
-        console.log(data, 'data')
+        console.log(data, 'updated data')
         await serverCalls.update(id!, data)
-        console.log(data, 'data')
         window.location.reload()
     }
 

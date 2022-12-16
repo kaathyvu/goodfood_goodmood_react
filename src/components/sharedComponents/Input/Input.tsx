@@ -44,6 +44,30 @@ export const Input = forwardRef((props:inputType, ref) => {
     )
 })
 
+export const InputSummary = forwardRef((props:inputType, ref) => {
+    return (
+        <TextField
+            variant = 'outlined'
+            margin = 'dense'
+            inputRef = {ref}
+            fullWidth
+            multiline
+            type = 'text'
+            sx={{
+                input: {
+                    color: '#66513e',
+                    fontFamily: 'gelasio',
+                },
+                label: {
+                    color: '#66513e',
+                    fontFamily: 'gelasio',
+                }
+            }}
+        {...props}
+        ></TextField>
+    )
+})
+
 export const PwInputSignIn = forwardRef((props:inputType, ref) => {
     return (
         <TextField

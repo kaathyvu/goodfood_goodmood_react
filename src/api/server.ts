@@ -2,7 +2,7 @@ let token = localStorage.getItem('token')
 
 export const serverCalls = {
     get: async () => {
-        const response = await fetch (`http://127.0.0.1:5000/api/recipes/${token}`, {
+        const response = await fetch (`https://sudsy-sage-lycra.glitch.me/api/recipes/${token}`, {
             method: "GET",
             headers: {
                 'Content-Type': 'application/json',
@@ -16,7 +16,7 @@ export const serverCalls = {
     },
 
     getOne: async (id: any) => {
-        const response = await fetch (`http://127.0.0.1:5000/api/recipes/${token}/${id}`, {
+        const response = await fetch (`https://sudsy-sage-lycra.glitch.me/api/recipes/${token}/${id}`, {
             method: "GET",
             headers: {
                 'Content-Type': 'application/json',
@@ -30,8 +30,8 @@ export const serverCalls = {
     },
 
     create: async (data:any) => {
-        console.log(data)
-        const response = await fetch(`http://127.0.0.1:5000/api/recipes/${token}`, {
+        console.log(data, 'created data')
+        const response = await fetch(`https://sudsy-sage-lycra.glitch.me/api/recipes/${token}`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json',
@@ -48,7 +48,7 @@ export const serverCalls = {
     },
 
     update: async (id: string, data:any) => {
-        const response = await fetch(`http://127.0.0.1:5000/api/recipes/${token}/${id}`, {
+        const response = await fetch(`https://sudsy-sage-lycra.glitch.me/api/recipes/${token}/${id}`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json',
@@ -59,7 +59,7 @@ export const serverCalls = {
     },
 
     delete: async (id: string) => {
-        const response = await fetch (`http://127.0.0.1:5000/api/recipes/${token}/${id}`, {
+        const response = await fetch (`https://sudsy-sage-lycra.glitch.me/api/recipes/${token}/${id}`, {
             method: 'DELETE',
             headers: {
                 'Content-type': 'application/json',
