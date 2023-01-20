@@ -15,7 +15,7 @@ import { serverCalls } from '../../api';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
 import Favorite from '@mui/icons-material/Favorite';
 
-
+const SPOON1 = '77f97ae6911848258d076ef999d0b3e0'
 
 const myStyles = {
     appBar: {
